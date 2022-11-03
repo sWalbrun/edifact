@@ -6,35 +6,37 @@ use EDI\Analyser;
 use EDI\Interpreter;
 use EDI\Parser;
 
-class InterpreterTest extends \PHPUnit\Framework\TestCase
+/**
+ * @internal
+ */
+final class InterpreterTest extends \PHPUnit\Framework\TestCase
 {
-
     public function testCOARRI()
     {
-        $parser = new Parser(__DIR__ . "/../files/D95BCOARRI.edi");
+        $parser = new Parser(__DIR__ . '/../files/D95BCOARRI.edi');
 
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('COARRI'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
         $interpreter->prepare($parser->get());
 
-        $this->assertCount(3, $interpreter->getMessages()); //2 + service
-        $this->assertCount(0, $interpreter->getErrors());
-        $this->assertCount(2, $interpreter->getServiceSegments());
+        static::assertCount(3, $interpreter->getMessages()); //2 + service
+        static::assertCount(0, $interpreter->getErrors());
+        static::assertCount(2, $interpreter->getServiceSegments());
     }
 
     public function testServiceSegments()
     {
-        $parser = new Parser(__DIR__ . "/../files/D95BCOARRI.edi");
+        $parser = new Parser(__DIR__ . '/../files/D95BCOARRI.edi');
 
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('COARRI'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
@@ -42,56 +44,56 @@ class InterpreterTest extends \PHPUnit\Framework\TestCase
         $svc = $interpreter->getServiceSegments();
         $svcjson = $interpreter->getJsonServiceSegments();
         $svcjsonpretty = $interpreter->getJsonServiceSegments(true);
-        $this->assertSame($svc, json_decode($svcjson, true));
-        $this->assertSame(26, substr_count($svcjsonpretty, "\n"));
+        static::assertSame($svc, \json_decode($svcjson, true));
+        static::assertSame(28, \substr_count($svcjsonpretty, "\n"));
     }
 
     public function testBAPLIE()
     {
-        $parser = new Parser(__DIR__ . "/../files/D95BBAPLIE.edi");
+        $parser = new Parser(__DIR__ . '/../files/D95BBAPLIE.edi');
 
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('BAPLIE'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
         $interpreter->prepare($parser->get());
 
-        $this->assertCount(2, $interpreter->getMessages());
-        $this->assertCount(0, $interpreter->getErrors());
-        $this->assertCount(2, $interpreter->getServiceSegments());
+        static::assertCount(2, $interpreter->getMessages());
+        static::assertCount(0, $interpreter->getErrors());
+        static::assertCount(2, $interpreter->getServiceSegments());
 
-        $this->assertSame([], $interpreter->getErrors());
+        static::assertSame([], $interpreter->getErrors());
     }
 
     public function testDESADV()
     {
-        $parser = new Parser(__DIR__ . "/../files/D96ADESADV.edi");
+        $parser = new Parser(__DIR__ . '/../files/D96ADESADV.edi');
 
         $mapping = new \EDI\Mapping\MappingProvider('D96A');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('DESADV'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
         $interpreter->prepare($parser->get());
 
-        $this->assertJsonStringEqualsJsonFile(
-            __DIR__ . "/../files/D96ADESADV.json",
+        static::assertJsonStringEqualsJsonFile(
+            __DIR__ . '/../files/D96ADESADV.json',
             $interpreter->getJson(true),
-            "JSON does not match expected output"
+            'JSON does not match expected output'
         );
 
-        $this->assertSame(3152, \strlen($interpreter->getJson()));
-        $this->assertSame(8379, \strlen($interpreter->getJson(true)));
+        static::assertSame(3598, \strlen($interpreter->getJson()));
+        static::assertSame(9383, \strlen($interpreter->getJson(true)));
 
-        $this->assertCount(2, $interpreter->getMessages());
-        $this->assertCount(0, $interpreter->getErrors());
-        $this->assertCount(2, $interpreter->getServiceSegments());
-        $this->assertSame([], $interpreter->getErrors());
+        static::assertCount(2, $interpreter->getMessages());
+        static::assertCount(0, $interpreter->getErrors());
+        static::assertCount(2, $interpreter->getServiceSegments());
+        static::assertSame([], $interpreter->getErrors());
     }
 
     public function testMissingUNTUNZ()
@@ -101,33 +103,33 @@ class InterpreterTest extends \PHPUnit\Framework\TestCase
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('BAPLIE'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
         $interpreter->prepare($parser->get());
         $errors = $interpreter->getErrors();
-        $this->assertCount(2, $errors);
+        static::assertCount(2, $errors);
         $segments = [];
         foreach ($errors as $err) {
             $segments[] = $err['segmentId'];
         }
-        $this->assertSame(['UNZ', 'UNT'], $segments);
+        static::assertSame(['UNZ', 'UNT'], $segments);
     }
 
     public function testOrderError()
     {
-        $edi = file_get_contents(__DIR__ . '/../files/example_order_error.edi');
+        $edi = \file_get_contents(__DIR__ . '/../files/example_order_error.edi');
         $parser = new Parser($edi);
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('ORDERS'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
         $interpreter->prepare($parser->get());
-        $this->assertSame(
+        static::assertSame(
             [
                 0 => 'There\'s a character not escaped with ? in the data; string :::H-Vollmilch 3,5%  ?*?*Marke?*?*:1l Tertra mit Drehverschluss',
             ],
@@ -135,62 +137,62 @@ class InterpreterTest extends \PHPUnit\Framework\TestCase
         );
 
         $errors = $interpreter->getErrors();
-        $this->assertCount(3, $errors);
+        static::assertCount(3, $errors);
         $segments = [];
         foreach ($errors as $err) {
             $segments[] = $err['segmentId'];
         }
-        $this->assertSame(['IMD', 'IMD', 'IMD'], $segments);
+        static::assertSame(['IMD', 'IMD', 'IMD'], $segments);
 
-        $this->assertCount(2, $interpreter->getMessages());
+        static::assertCount(2, $interpreter->getMessages());
 
-        $this->assertContains('"messageHeader"', $interpreter->getJson(true));
-        $this->assertContains('"interchangeHeader"', $interpreter->getJsonServiceSegments(true));
+        static::assertContains('"messageHeader"', $interpreter->getJson(true));
+        static::assertContains('"interchangeHeader"', $interpreter->getJsonServiceSegments(true));
 
         $arrayy = $interpreter->getArrayy();
-        $this->assertSame(
+        static::assertSame(
             'Butter 40x250g Alu',
             $arrayy->get('0.SG25.0.itemDescription.itemDescription.itemDescription')
         );
 
         $arrayy = $interpreter->getArrayyServiceSegments();
-        $this->assertCount(
-            13,
+        static::assertCount(
+            14,
             $arrayy->get('interchangeHeader')
         );
     }
 
     public function testOrderOk()
     {
-        $edi = file_get_contents(__DIR__ . '/../files/example_order_ok.edi');
+        $edi = \file_get_contents(__DIR__ . '/../files/example_order_ok.edi');
         $parser = new Parser($edi);
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('ORDERS'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
         $interpreter->prepare($parser->get());
-        $this->assertSame([], $parser->errors());
+        static::assertSame([], $parser->errors());
 
         $errors = $interpreter->getErrors();
-        $this->assertCount(0, $errors);
+        static::assertCount(0, $errors);
 
-        $this->assertCount(2, $interpreter->getMessages());
+        static::assertCount(2, $interpreter->getMessages());
 
-        $this->assertContains('"messageHeader"', $interpreter->getJson(true));
-        $this->assertContains('"interchangeHeader"', $interpreter->getJsonServiceSegments(true));
+        static::assertContains('"messageHeader"', $interpreter->getJson(true));
+        static::assertContains('"interchangeHeader"', $interpreter->getJsonServiceSegments(true));
 
         $arrayy = $interpreter->getArrayy();
-        $this->assertSame(
+        static::assertSame(
             'Butter 40x250g Alu',
             $arrayy->get('0.SG25.0.itemDescription.itemDescription.itemDescription')
         );
 
         $arrayy = $interpreter->getArrayyServiceSegments();
-        $this->assertCount(
-            13,
+        static::assertCount(
+            14,
             $arrayy->get('interchangeHeader')
         );
     }
@@ -202,7 +204,7 @@ class InterpreterTest extends \PHPUnit\Framework\TestCase
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('BAPLIE'), $segs, $svc);
         /** @noinspection UnusedFunctionResultInspection */
@@ -212,8 +214,8 @@ class InterpreterTest extends \PHPUnit\Framework\TestCase
         foreach ($errors as $err) {
             $segments[] = $err['segmentId'];
         }
-        $this->assertContains('UNB', $segments);
-        $this->assertContains('UNH', $segments);
+        static::assertContains('UNB', $segments);
+        static::assertContains('UNH', $segments);
     }
 
     public function testTooManyElements()
@@ -223,13 +225,36 @@ class InterpreterTest extends \PHPUnit\Framework\TestCase
         $mapping = new \EDI\Mapping\MappingProvider('D95B');
         $analyser = new Analyser();
         $segs = $analyser->loadSegmentsXml($mapping->getSegments());
-        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments(3));
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
 
         $interpreter = new Interpreter($mapping->getMessage('BAPLIE'), $segs, $svc);
-        $p = $interpreter->prepare($parser->get());
+        $interpreter->prepare($parser->get());
         $errors = $interpreter->getErrors();
         $svcSegs = $interpreter->getServiceSegments();
-        $this->assertCount(0, $errors);
-        $this->assertArrayHasKey('Extension2', $svcSegs['interchangeTrailer']);
+        static::assertCount(0, $errors);
+        static::assertArrayHasKey('Extension2', $svcSegs['interchangeTrailer']);
+    }
+
+    public function testIdInsteadOfName()
+    {
+        $edi = \file_get_contents(__DIR__ . '/../files/D96ADESADV.edi');
+        $parser = new Parser($edi);
+        $mapping = new \EDI\Mapping\MappingProvider($parser->getMessageDirectory());
+        $analyser = new Analyser();
+        $segs = $analyser->loadSegmentsXml($mapping->getSegments());
+        $svc = $analyser->loadSegmentsXml($mapping->getServiceSegments('3'));
+
+        $interpreter = new Interpreter($mapping->getMessage($parser->getMessageFormat()), $segs, $svc);
+        $interpreter->toggleUseIdInsteadOfNameForOutput(true);
+
+        $p = $interpreter->prepare($parser->get());
+        static::assertSame([], $parser->errors());
+
+        static::assertArrayHasKey('BGM', $p[0]);
+        static::assertArrayHasKey('C002', $p[0]['BGM']);
+        static::assertArrayHasKey('1001', $p[0]['BGM']['C002']);
+        static::assertSame('351', $p[0]['BGM']['C002']['1001']);
+        static::assertArrayHasKey('SG10', $p[0]);
+        static::assertArrayHasKey('CPS', $p[0]['SG10'][0]);
     }
 }
